@@ -4,10 +4,12 @@ import { MotionRoot } from "@/components/motion-root";
 
 export default function MarketingLayout({ children }: LayoutProps<"/">) {
   return (
-    <div className="flex min-h-dvh flex-col bg-bg">
+    <div className="flex min-h-dvh flex-col overflow-x-clip bg-bg">
       {/* Without JS nothing would ever be revealed, so show everything. */}
       <noscript>
-        <style>{"[data-reveal]{opacity:1!important;transform:none!important;filter:none!important}"}</style>
+        <style>
+          {"[data-reveal],.display .line>span,.glyph{opacity:1!important;transform:none!important;filter:none!important}"}
+        </style>
       </noscript>
       <MotionRoot />
       <MarketingHeader />

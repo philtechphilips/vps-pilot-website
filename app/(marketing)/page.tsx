@@ -3,14 +3,26 @@ import type { CSSProperties, ReactNode } from "react";
 import { BrandChip, type Brand } from "@/components/brand-chip";
 import { CommandPill } from "@/components/copy-button";
 import { Icon, type IconName } from "@/components/icons";
+import { CountUp } from "@/components/marketing/count-up";
+import { DeployTabs } from "@/components/marketing/deploy-tabs";
+import { Display, Label, Mono } from "@/components/marketing/display";
+import { BackupVisual, QueryVisual, UsersVisual } from "@/components/marketing/feature-visuals";
+import { FlowDiagram } from "@/components/marketing/flow-diagram";
+import { Glyph } from "@/components/marketing/glyphs";
+import { HeroField } from "@/components/marketing/hero-field";
 import { TerminalMock } from "@/components/marketing/mocks";
-import { MotionClip } from "@/components/marketing/motion-clip";
+import { ProblemSolution } from "@/components/marketing/problem-solution";
 import { PROJECT_URL } from "@/lib/site";
 import { cn } from "@/lib/utils";
 
 // Installs the control plane (dashboard, API, database, HTTPS) on Ubuntu/Debian.
 const INSTALL =
   "curl -fsSL https://raw.githubusercontent.com/philtechphilips/VPS-PIlot-BE/main/deploy/install.sh | sudo bash -s -- --domain pilot.example.com";
+
+const wrap = "mx-auto w-full max-w-[1240px] px-4 sm:px-6";
+const section = "scroll-mt-20 pt-32 sm:pt-48";
+const lead = "text-[17px] leading-relaxed text-muted sm:text-[19px]";
+const heading = "text-[clamp(40px,7.2vw,100px)]";
 
 /** Stagger delay for reveal animations. */
 const d = (ms: number) => ({ "--d": `${ms}ms` }) as CSSProperties;
@@ -19,62 +31,15 @@ export default function HomePage() {
   return (
     <>
       <Hero />
-      <div className="mx-auto max-w-[1080px] space-y-28 px-4 py-24 sm:space-y-40 sm:px-6 sm:py-32">
-        <Feature
-          id="deploy"
-          title="Deploy from Git, without touching SSH"
-          desc="Connect a repository and VPSPilot builds, health-checks and switches traffic for you. Docker, Compose, Node.js or Python, on servers you already own."
-          points={[
-            { icon: "refresh", lead: "Zero downtime:", text: "the new release takes traffic only after it passes its health check." },
-            { icon: "git-branch", lead: "Previews per pull request,", text: "each on its own address, removed when the PR closes." },
-            { icon: "rollback", lead: "Roll back in one click", text: "to any earlier release that is still on the server." },
-          ]}
-          cta={{ label: "Deploy your first app", href: "/docs/getting-started/install" }}
-          clip="deploy"
-        />
-        <Feature
-          id="monitor"
-          flip
-          title="Know when something breaks, before your users do"
-          desc="Every server reports CPU, memory, disk and app health. Set a rule once and get told on Telegram, Slack or email the moment it trips."
-          points={[
-            { icon: "activity", lead: "Live metrics", text: "for every server and app, kept for 30 days." },
-            { icon: "bell", lead: "Alerts where you are:", text: "Telegram, Slack, Discord, email or a webhook." },
-            { icon: "calendar", lead: "A weekly report", text: "with uptime, deploys, errors and disk growth." },
-          ]}
-          cta={{ label: "See monitoring", href: "/docs/operations/monitoring" }}
-          clip="monitor"
-        />
-        <Feature
-          id="databases"
-          title="Your databases, managed from the browser"
-          desc="Create and register PostgreSQL, MySQL, MariaDB and Redis. Run queries, manage users and keep encrypted backups that are restored to prove they work."
-          points={[
-            { icon: "database", lead: "Query and browse", text: "with read-only roles for the people who only need to look." },
-            { icon: "archive", lead: "Encrypted backups", text: "to S3, R2 or Backblaze, on the schedule you set." },
-            { icon: "check-circle", lead: "Restore-verified:", text: "a backup counts only once it has been restored." },
-          ]}
-          cta={{ label: "Explore databases", href: "/docs/databases/overview" }}
-          clip="databases"
-        />
-        <Feature
-          id="security"
-          flip
-          title="Safe by default, with a record of every change"
-          desc="Agents only dial out, so your servers expose nothing new. Every action is a typed job, never a raw shell, and lands in the audit log."
-          points={[
-            { icon: "network", lead: "Outbound-only agents:", text: "no inbound port, no Docker socket on the web." },
-            { icon: "fingerprint", lead: "MFA and roles", text: "for the owner, admins and read-only viewers." },
-            { icon: "file-text", lead: "Full audit trail:", text: "who did what, to which target, and how it went." },
-          ]}
-          cta={{ label: "Read the security model", href: "/docs/concepts/security" }}
-          clip="security"
-        />
-        <GetStarted />
-        <Stack />
-        <Faq />
-      </div>
-      <FinalCta />
+      <ProblemSolution />
+      <Deploy />
+      <Facts />
+      <Monitor />
+      <Databases />
+      <Security />
+      <Install />
+      <Faq />
+      <Closing />
     </>
   );
 }
@@ -83,170 +48,354 @@ export default function HomePage() {
 /* Shared bits                                                         */
 /* ------------------------------------------------------------------ */
 
-function Pill({ href, children, className }: { href: string; children: ReactNode; className?: string }) {
+function Primary({ href, children }: { href: string; children: ReactNode }) {
   return (
-    <Link href={href} className={cn("btn-primary group inline-flex h-10 items-center gap-1.5 rounded-full pr-3.5 pl-5 text-[14px] font-medium", className)}>
+    <Link href={href} className="btn-primary group inline-flex h-11 items-center gap-2 rounded-lg pr-4 pl-5 text-[15px] font-medium">
       {children}
-      <Icon name="chevron-right" size={15} className="transition-transform group-hover:translate-x-0.5" />
+      <Icon name="arrow-right" size={15} className="transition-transform duration-300 group-hover:translate-x-0.5" />
     </Link>
   );
 }
 
-function Heading({ children, className }: { children: ReactNode; className?: string }) {
-  return <h2 className={cn("text-[30px] leading-[1.15] font-medium tracking-[-0.025em] text-balance sm:text-[36px]", className)}>{children}</h2>;
+function GitHubButton({ label = "Star on GitHub" }: { label?: string }) {
+  return (
+    <a
+      href={PROJECT_URL}
+      target="_blank"
+      rel="noreferrer"
+      className="inline-flex h-11 items-center gap-2 rounded-lg border border-line-strong bg-ink/[0.03] px-5 text-[15px] font-medium text-fg transition-colors hover:bg-ink/[0.07]"
+    >
+      <Icon name="github" size={16} /> {label}
+    </a>
+  );
 }
 
 /* ------------------------------------------------------------------ */
 /* Hero                                                                */
 /* ------------------------------------------------------------------ */
 
+const facts = [
+  { label: "License", value: "Apache-2.0" },
+  { label: "Install", value: "One command" },
+  { label: "Inbound ports", value: "None" },
+];
+
 function Hero() {
   return (
-    <section className="px-4 pt-16 sm:px-6 sm:pt-24">
-      <div className="mx-auto max-w-[720px] text-center">
-        <Link
-          href="/docs"
-          className="rise-in inline-flex items-center gap-2 rounded-full border border-line py-1 pr-3 pl-1 text-[13px] text-muted transition-colors hover:text-fg"
-          style={d(0)}
-        >
-          <span className="rounded-full bg-accent/[0.08] px-2 py-0.5 text-xs font-medium text-accent">New</span>
-          Previews, app moves and status pages
-          <Icon name="chevron-right" size={13} />
-        </Link>
-        <h1 className="rise-in mt-7 text-[42px] leading-[1.06] font-medium tracking-[-0.035em] text-balance sm:text-[60px]" style={d(100)}>
-          The control plane for your own servers
-        </h1>
-        <p className="rise-in mx-auto mt-5 max-w-[520px] text-[16px] leading-relaxed text-muted sm:text-[17px]" style={d(200)}>
-          Deploy apps, watch your servers and run your databases from one dashboard you host yourself. No SSH sessions, no surprise bills.
-        </p>
-        <div className="rise-in mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row sm:gap-5" style={d(300)}>
-          <Pill href="/docs/getting-started/install">Get started</Pill>
-          <a
-            href={PROJECT_URL}
-            target="_blank"
-            rel="noreferrer"
-            className="inline-flex h-10 items-center gap-1.5 text-[14px] font-medium text-fg transition-colors hover:text-accent"
-          >
-            <Icon name="github" size={15} /> View on GitHub
-          </a>
-        </div>
-      </div>
-      <div className="mx-auto mt-16 max-w-[1180px] sm:mt-20">
-        <div className="overflow-hidden rounded-[28px] bg-shot">
-          <MotionClip name="hero" width={1920} height={840} />
-        </div>
-      </div>
-    </section>
-  );
-}
-
-/* ------------------------------------------------------------------ */
-/* Feature rows                                                        */
-/* ------------------------------------------------------------------ */
-
-type Point = { icon: IconName; lead: string; text: string };
-
-function Feature({
-  id,
-  title,
-  desc,
-  points,
-  cta,
-  clip,
-  flip,
-}: {
-  id: string;
-  title: string;
-  desc: string;
-  points: Point[];
-  cta: { label: string; href: string };
-  clip: string;
-  flip?: boolean;
-}) {
-  return (
-    <section id={id} className="grid scroll-mt-24 items-center gap-10 lg:grid-cols-2 lg:gap-16">
-      <div className={cn(flip && "lg:order-2")}>
-        <div className="overflow-hidden rounded-[28px] bg-shot">
-          <MotionClip name={clip} width={1000} height={880} />
-        </div>
-      </div>
-      <div data-reveal style={d(100)} className={cn("max-w-[440px]", flip && "lg:order-1")}>
-        <Heading>{title}</Heading>
-        <p className="mt-4 text-[15px] leading-relaxed text-muted">{desc}</p>
-        <ul className="mt-6 space-y-3.5">
-          {points.map((p) => (
-            <li key={p.lead} className="flex gap-3 text-[14px] leading-relaxed text-muted">
-              <Icon name={p.icon} size={16} className="mt-[3px] shrink-0 text-accent" />
-              <span>
-                <span className="font-medium text-fg">{p.lead}</span> {p.text}
-              </span>
-            </li>
-          ))}
-        </ul>
-        <Pill href={cta.href} className="mt-8">
-          {cta.label}
-        </Pill>
-      </div>
-    </section>
-  );
-}
-
-/* ------------------------------------------------------------------ */
-/* Getting started                                                     */
-/* ------------------------------------------------------------------ */
-
-function GetStarted() {
-  const steps = [
-    { title: "Install", desc: "One command on a fresh Ubuntu or Debian VPS." },
-    { title: "Secure", desc: "Create the owner account and turn on MFA." },
-    { title: "Enroll", desc: "Add each server with a single-use token." },
-  ];
-  return (
-    <section id="get-started" className="scroll-mt-24">
-      <div data-reveal className="mx-auto max-w-[560px] text-center">
-        <Heading>Up and running in five minutes</Heading>
-        <p className="mt-4 text-[15px] leading-relaxed text-muted">
-          VPSPilot installs on your own server with one command, then adds your other servers with a single-use token each.
-        </p>
-        <div className="mt-7 flex justify-center">
-          <CommandPill command={INSTALL} className="w-full max-w-[520px] rounded-full border-line bg-bg-100 pl-5 shadow-[0_1px_2px_rgb(0_0_0/0.04)]" />
-        </div>
-      </div>
-      <div data-reveal className="mt-12 rounded-[28px] bg-shot p-6 sm:p-10">
-        <div className="mx-auto grid max-w-[880px] items-center gap-8 lg:grid-cols-[1fr_260px]">
-          <TerminalMock />
-          <ol className="space-y-5">
-            {steps.map((s, i) => (
-              <li key={s.title} className="flex gap-3.5">
-                <span className="flex size-7 shrink-0 items-center justify-center rounded-full bg-bg-100 text-[12px] font-semibold text-accent shadow-[0_1px_2px_rgb(0_0_0/0.06),inset_0_0_0_1px_rgb(0_0_0/0.06)]">
-                  {i + 1}
-                </span>
-                <div>
-                  <p className="text-[14px] font-medium">{s.title}</p>
-                  <p className="mt-0.5 text-[13px] text-muted">{s.desc}</p>
-                </div>
-              </li>
+    <section className="relative -mt-16 overflow-hidden pt-16">
+      <HeroField className="[mask-image:radial-gradient(ellipse_80%_75%_at_55%_45%,black_25%,transparent_78%)]" />
+      <div className={cn(wrap, "relative pt-14 sm:pt-24")}>
+        <div className="flex flex-col gap-10 lg:flex-row lg:items-start lg:justify-between">
+          <div className="max-w-[580px]">
+            <p className="appear text-[19px] leading-[1.45] text-muted sm:text-[21px]" style={d(80)}>
+              <span className="text-fg">The open-source control plane</span> for the servers you already own. Deploy apps, watch every server and run your
+              databases from one dashboard you host yourself.
+            </p>
+            <div className="appear mt-8 flex flex-wrap gap-3" style={d(200)}>
+              <Primary href="/docs/getting-started/install">Get started</Primary>
+              <GitHubButton />
+            </div>
+          </div>
+          <dl className="appear grid grid-cols-3 gap-6 sm:gap-10 lg:pt-1.5" style={d(320)}>
+            {facts.map((f) => (
+              <div key={f.label}>
+                <dt className="font-mono text-[11px] tracking-[0.14em] text-subtle uppercase">{f.label}</dt>
+                <dd className="mt-2 text-[15px] font-medium sm:text-[16px]">{f.value}</dd>
+              </div>
             ))}
-          </ol>
+          </dl>
         </div>
+        <Display
+          as="h1"
+          load
+          className="mt-16 text-[clamp(40px,9.6vw,144px)] sm:mt-24"
+          lines={[
+            "Put your servers",
+            <>
+              on <Glyph name="server" />
+              <Mono caret>autopilot</Mono>
+            </>,
+          ]}
+        />
+      </div>
+      <StackMarquee />
+    </section>
+  );
+}
+
+const stack: Brand[] = ["Ubuntu", "Debian", "Docker", "Node.js", "Next.js", "Bun", "Python", "FastAPI", "Go", "Rust", "PostgreSQL", "MySQL", "MariaDB", "Redis"];
+
+function StackMarquee() {
+  return (
+    <div className={cn(wrap, "relative mt-20 sm:mt-28")}>
+      <div className="appear flex items-center gap-10" style={d(700)}>
+        <Label className="hidden shrink-0 leading-5 sm:block">
+          Runs the stack
+          <br />
+          you already use
+        </Label>
+        <div className="marquee marquee-mask min-w-0 flex-1 overflow-hidden py-2">
+          <div className="marquee-track gap-12 pr-12">
+            {[...stack, ...stack].map((b, n) => (
+              <span
+                key={n}
+                aria-hidden={n >= stack.length || undefined}
+                className="inline-flex items-center gap-2.5 text-[15px] font-medium whitespace-nowrap text-muted opacity-70 grayscale transition duration-300 hover:text-fg hover:opacity-100 hover:grayscale-0"
+              >
+                <BrandChip name={b} size={24} className="rounded-md" />
+                {b}
+              </span>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/* Deploy                                                              */
+/* ------------------------------------------------------------------ */
+
+function Deploy() {
+  return (
+    <section id="deploy" className={cn(wrap, section)}>
+      <Label>01 · Deploy</Label>
+      <Display
+        className={cn("mt-6", heading)}
+        lines={[
+          "Push to deploy.",
+          <>
+            Never <Glyph name="terminal" />
+            <Mono>ssh</Mono> in.
+          </>,
+        ]}
+      />
+      <p data-reveal className={cn("mt-8 max-w-[580px]", lead)}>
+        VPSPilot builds, health-checks and releases your apps on servers you already pay for. Docker, Compose, Node.js or Python, straight from
+        Git.
+      </p>
+      <div className="mt-14 sm:mt-20">
+        <DeployTabs />
       </div>
     </section>
   );
 }
 
-const stack: Brand[] = ["Ubuntu", "Debian", "Docker", "Node.js", "Next.js", "Python", "FastAPI", "Go", "Bun", "PostgreSQL", "MySQL", "Redis"];
+/* ------------------------------------------------------------------ */
+/* Facts                                                               */
+/* ------------------------------------------------------------------ */
 
-function Stack() {
+function Stat({ value, label, text, delay = 0 }: { value: number; label: string; text: string; delay?: number }) {
   return (
-    <section data-reveal className="text-center">
-      <p className="text-[14px] text-muted">Works with the stack you already run</p>
-      <div className="mx-auto mt-6 flex max-w-[760px] flex-wrap justify-center gap-x-6 gap-y-4">
-        {stack.map((b) => (
-          <span key={b} className="inline-flex items-center gap-2 text-[13px] text-muted">
-            <BrandChip name={b} size={22} className="rounded-md" />
-            {b}
-          </span>
+    <div data-reveal style={d(delay)} className="flex flex-col justify-between gap-10 rounded-2xl border border-line bg-bg-100 p-8 sm:p-10">
+      <p className="flex items-start text-[88px] leading-[0.85] font-semibold tracking-[-0.05em] sm:text-[104px]">
+        <span aria-hidden="true" className="mt-2 mr-3 size-3 shrink-0 rounded-[3px] bg-accent" />
+        <CountUp value={value} />
+      </p>
+      <div>
+        <p className="text-[17px] font-medium">{label}</p>
+        <p className="mt-1.5 text-[15px] leading-relaxed text-muted">{text}</p>
+      </div>
+    </div>
+  );
+}
+
+function Facts() {
+  return (
+    <section className={cn(wrap, section)}>
+      <div className="grid gap-4 lg:grid-cols-3">
+        <div data-reveal className="relative flex min-h-[340px] flex-col justify-between overflow-hidden rounded-2xl bg-accent p-8 text-white sm:p-10 lg:col-span-2">
+          <div
+            aria-hidden="true"
+            className="absolute inset-0 opacity-25 [background-image:radial-gradient(rgb(255_255_255)_1px,transparent_1.2px)] [background-size:20px_20px] [mask-image:linear-gradient(to_top,black,transparent_75%)]"
+          />
+          <p className="relative font-mono text-[11px] tracking-[0.14em] uppercase opacity-75">By design</p>
+          <p className="relative mt-10 max-w-[640px] text-[26px] leading-[1.22] font-medium tracking-[-0.025em] sm:text-[36px]">
+            If the control plane goes down, your apps keep running. The agents catch up when it&apos;s back.
+          </p>
+        </div>
+        <Stat value={0} label="Inbound ports" text="Agents dial out over HTTPS, so nothing new listens on your servers." delay={120} />
+      </div>
+      <div className="mt-4 grid gap-4 md:grid-cols-3">
+        <Stat value={1} label="Command to install" text="Dashboard, API, database and HTTPS on one Ubuntu or Debian server." />
+        <Stat value={4} label="Database engines" text="PostgreSQL, MySQL, MariaDB and Redis, created or registered." delay={120} />
+        <Stat value={6} label="Stacks without a Dockerfile" text="Node.js, Bun, Python, Go, Rust and static sites are detected and built." delay={240} />
+      </div>
+    </section>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/* Monitor                                                             */
+/* ------------------------------------------------------------------ */
+
+const watch: { icon: IconName; title: string; text: string }[] = [
+  { icon: "activity", title: "Live metrics and logs", text: "CPU, memory, disk and network for every server, and app logs you can search across all of them." },
+  { icon: "bell", title: "Alert rules", text: "A disk filling up, an app logging errors, a site failing its uptime check: set the threshold once." },
+  { icon: "calendar", title: "A weekly report", text: "Uptime, deploys, errors, security findings and disk growth, in one email every week." },
+];
+
+function Monitor() {
+  return (
+    <section id="monitor" className={cn(wrap, section, "text-center")}>
+      <Label>02 · Monitor</Label>
+      <Display
+        className={cn("mt-6", heading)}
+        lines={[
+          "Know before",
+          <>
+            your <Glyph name="pulse" />
+            <Mono>users</Mono> do
+          </>,
+        ]}
+      />
+      <p data-reveal className={cn("mx-auto mt-8 max-w-[620px]", lead)}>
+        Every server reports its health. Set a rule once and hear about it by email, Slack, Telegram or webhook the moment it trips.
+      </p>
+      <div data-reveal className="mt-16 sm:mt-20">
+        <FlowDiagram />
+      </div>
+      <div className="mt-16 grid gap-10 text-left sm:mt-20 md:grid-cols-3">
+        {watch.map((w, n) => (
+          <div key={w.title} data-reveal style={d(n * 120)} className="border-t border-line pt-6">
+            <Icon name={w.icon} size={18} className="text-accent-fg" />
+            <h3 className="mt-4 text-[18px] font-medium">{w.title}</h3>
+            <p className="mt-2 text-[15px] leading-relaxed text-muted">{w.text}</p>
+          </div>
         ))}
+      </div>
+    </section>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/* Databases                                                           */
+/* ------------------------------------------------------------------ */
+
+function Card({ title, text, visual, delay }: { title: string; text: string; visual: ReactNode; delay: number }) {
+  return (
+    <div data-reveal style={d(delay)}>
+      <div data-spot className="relative h-[280px] overflow-hidden rounded-2xl border border-line bg-bg-200">
+        {visual}
+      </div>
+      <h3 className="mt-6 text-[19px] font-medium tracking-[-0.01em]">{title}</h3>
+      <p className="mt-2 text-[15px] leading-relaxed text-muted">{text}</p>
+    </div>
+  );
+}
+
+function Databases() {
+  return (
+    <section id="databases" className={cn(wrap, section)}>
+      <Label>03 · Databases</Label>
+      <Display
+        className={cn("mt-6", heading)}
+        lines={[
+          "Your databases,",
+          <>
+            in <Glyph name="database" />
+            <Mono>one tab</Mono>
+          </>,
+        ]}
+      />
+      <p data-reveal className={cn("mt-8 max-w-[600px]", lead)}>
+        Create or register PostgreSQL, MySQL, MariaDB and Redis. Query them, manage their users and keep encrypted backups that are restored to
+        prove they work.
+      </p>
+      <div className="mt-16 grid gap-x-6 gap-y-14 sm:mt-20 md:grid-cols-3">
+        <Card title="Query and browse" text="Run SQL from the browser, with read-only roles for the people who only need to look." visual={<QueryVisual />} delay={0} />
+        <Card title="Backups that restore" text="Encrypted, on your schedule, to S3, R2, Backblaze or Google Drive, and restored to check them." visual={<BackupVisual />} delay={120} />
+        <Card title="Users and access" text="Create logins, scope them to one database and rotate their passwords in a click." visual={<UsersVisual />} delay={240} />
+      </div>
+    </section>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/* Security                                                            */
+/* ------------------------------------------------------------------ */
+
+const guards: { icon: IconName; title: string; text: string }[] = [
+  { icon: "network", title: "Outbound-only agents", text: "Agents dial out over HTTPS. Your servers open no new port." },
+  { icon: "terminal", title: "Typed jobs, never a shell", text: "Every action is a fixed operation with checked inputs, run by a small root helper." },
+  { icon: "fingerprint", title: "Two-factor and roles", text: "Authenticator or email codes, recovery codes, and admin and viewer roles." },
+  { icon: "file-text", title: "An audit log of everything", text: "Who did what, to which server or app, and how it went." },
+  { icon: "lock", title: "Secrets encrypted at rest", text: "Environment values, database passwords and backup keys, encrypted with your key." },
+  { icon: "shield-check", title: "Vulnerability checks", text: "Every app's dependencies and OS packages, checked daily against OSV.dev." },
+];
+
+function Security() {
+  return (
+    <section id="security" className={cn(wrap, section)}>
+      <div className="grid gap-8 lg:grid-cols-2 lg:items-end">
+        <div>
+          <Label>04 · Security</Label>
+          <Display
+            className={cn("mt-6", heading)}
+            lines={[
+              "Secure by",
+              <>
+                <Glyph name="shield" />
+                <Mono>default</Mono>
+              </>,
+            ]}
+          />
+        </div>
+        <p data-reveal className={cn("max-w-[480px] lg:justify-self-end lg:pb-3", lead)}>
+          Your control plane holds the keys to every server, so it is built like it.
+        </p>
+      </div>
+      <div className="mt-16 grid border-t border-line sm:mt-20 sm:grid-cols-2 lg:grid-cols-3">
+        {guards.map((g, n) => (
+          <div
+            key={g.title}
+            data-reveal
+            style={d((n % 3) * 100)}
+            className="border-b border-line py-8 sm:px-8 sm:odd:border-r lg:odd:border-r-0 lg:[&:not(:nth-child(3n))]:border-r"
+          >
+            <Icon name={g.icon} size={20} className="text-accent-fg" />
+            <h3 className="mt-5 text-[18px] font-medium">{g.title}</h3>
+            <p className="mt-2 text-[15px] leading-relaxed text-muted">{g.text}</p>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/* Install                                                             */
+/* ------------------------------------------------------------------ */
+
+function Install() {
+  return (
+    <section id="install" className={cn(wrap, section)}>
+      <div className="grid items-center gap-14 lg:grid-cols-[1.05fr_1fr]">
+        <div className="min-w-0">
+          <Label>05 · Install</Label>
+          <Display
+            className="mt-6 text-[clamp(40px,6.4vw,88px)]"
+            lines={[
+              "One command,",
+              <>
+                five <Mono caret>minutes</Mono>
+              </>,
+            ]}
+          />
+          <p data-reveal className={cn("mt-8 max-w-[520px]", lead)}>
+            Install the control plane on a fresh Ubuntu or Debian server, create the owner account, then add each server with a single-use token.
+          </p>
+          <div data-reveal className="mt-8">
+            <CommandPill command={INSTALL} className="w-full max-w-[560px] rounded-lg bg-bg-100" />
+            <div className="mt-6 flex flex-wrap gap-3">
+              <Primary href="/docs/getting-started/install">Read the install guide</Primary>
+            </div>
+          </div>
+        </div>
+        <div data-reveal data-motion="tilt" className="min-w-0">
+          <TerminalMock />
+        </div>
       </div>
     </section>
   );
@@ -275,41 +424,64 @@ const faqs = [
   },
   {
     q: "Is it free?",
-    a: "Yes. VPSPilot is open source and self-hosted, so you only pay for the servers you already rent.",
+    a: "Yes. VPSPilot is open source under the Apache License 2.0 and self-hosted, so you only pay for the servers you already rent.",
   },
 ];
 
 function Faq() {
   return (
-    <section id="faq" className="mx-auto max-w-[720px] scroll-mt-24">
-      <Heading className="text-center">Questions, answered</Heading>
-      <div className="mt-10 divide-y divide-line border-y border-line">
-        {faqs.map((f) => (
-          <details key={f.q} className="group py-5">
-            <summary className="flex cursor-pointer list-none items-center justify-between gap-6 text-[15px] font-medium [&::-webkit-details-marker]:hidden">
-              {f.q}
-              <Icon name="plus" size={16} className="shrink-0 text-subtle transition-transform group-open:rotate-45" />
-            </summary>
-            <p className="mt-3 max-w-[600px] text-[14px] leading-relaxed text-muted">{f.a}</p>
-          </details>
-        ))}
+    <section id="faq" className={cn(wrap, section)}>
+      <div className="grid gap-12 lg:grid-cols-[1fr_1.35fr] lg:gap-20">
+        <div>
+          <Label>FAQ</Label>
+          <Display className="mt-6 text-[clamp(40px,5.6vw,76px)]" lines={["Questions,", <Mono key="a">answered</Mono>]} />
+          <p data-reveal className="mt-8 text-[16px] leading-relaxed text-muted">
+            Something else?{" "}
+            <Link href="/docs" className="text-fg underline decoration-line-strong underline-offset-4 hover:decoration-fg">
+              Read the docs
+            </Link>{" "}
+            or{" "}
+            <a href={`${PROJECT_URL}/issues`} target="_blank" rel="noreferrer" className="text-fg underline decoration-line-strong underline-offset-4 hover:decoration-fg">
+              open an issue
+            </a>
+            .
+          </p>
+        </div>
+        <div data-reveal className="faq divide-y divide-line border-y border-line">
+          {faqs.map((f) => (
+            <details key={f.q} className="group">
+              <summary className="flex cursor-pointer list-none items-center justify-between gap-6 py-6 text-[17px] font-medium transition-colors hover:text-fg [&::-webkit-details-marker]:hidden">
+                {f.q}
+                <Icon name="plus" size={18} className="shrink-0 text-subtle transition-transform duration-300 group-open:rotate-45" />
+              </summary>
+              <p className="max-w-[600px] pb-6 text-[15px] leading-relaxed text-muted">{f.a}</p>
+            </details>
+          ))}
+        </div>
       </div>
     </section>
   );
 }
 
-function FinalCta() {
+function Closing() {
   return (
-    <section className="px-4 pb-24 sm:px-6 sm:pb-32">
-      <div data-reveal className="mx-auto max-w-[1080px] rounded-[28px] bg-shot px-6 py-20 text-center sm:py-24">
-        <Heading>Your servers. Your control plane.</Heading>
-        <p className="mx-auto mt-4 max-w-md text-[15px] text-muted">Open source and self-hosted. Nothing leaves your infrastructure unless you send it.</p>
-        <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row sm:gap-5">
-          <Pill href="/docs/getting-started/install">Install VPSPilot</Pill>
-          <Link href="/docs" className="inline-flex h-10 items-center gap-1 text-[14px] font-medium text-fg transition-colors hover:text-accent">
-            Read the docs <Icon name="chevron-right" size={15} />
-          </Link>
-        </div>
+    <section className={cn(wrap, "py-32 text-center sm:py-48")}>
+      <Display
+        className="text-[clamp(44px,8.4vw,124px)]"
+        lines={[
+          "Your servers,",
+          <>
+            your <Glyph name="branch" />
+            <Mono caret>rules</Mono>
+          </>,
+        ]}
+      />
+      <p data-reveal className={cn("mx-auto mt-8 max-w-[520px]", lead)}>
+        Open source and self-hosted, on servers you control.
+      </p>
+      <div data-reveal className="mt-10 flex flex-wrap justify-center gap-3">
+        <Primary href="/docs/getting-started/install">Get started</Primary>
+        <GitHubButton />
       </div>
     </section>
   );
