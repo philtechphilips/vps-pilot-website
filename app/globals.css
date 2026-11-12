@@ -1,0 +1,499 @@
+@import "tailwindcss";
+
+/* `dark:` follows the theme chosen on <html data-theme>, not only the OS setting. */
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+
+/*
+ * Quiet palette: plain surfaces, hairline borders and a single indigo accent
+ * for buttons and links. Light by default; [data-theme="dark"] below swaps
+ * every token, so the UI reads only from these.
+ */
+@theme {
+  --color-bg: #ffffff;
+  --color-bg-100: #ffffff;
+  --color-bg-200: #fafafa;
+  --color-bg-300: #f3f3f4;
+  --color-line: rgb(0 0 0 / 0.08);
+  --color-line-strong: rgb(0 0 0 / 0.14);
+  --color-fg: #111111;
+  --color-muted: #555555;
+  --color-subtle: #737373;
+
+  --color-blue: #4338ca;
+  --color-blue-hover: #3730a3;
+  --color-blue-fg: #4338ca;
+  --color-ok: #16a34a;
+  --color-warn: #d97706;
+  --color-err: #dc2626;
+  --color-violet: #7c3aed;
+  --color-teal: #0d9488;
+
+  /* Tints and hairlines: black on light surfaces, white on dark ones. */
+  --color-ink: #000000;
+  /* Soft panel behind product shots. */
+  --color-shot: #f4f4f5;
+  --color-chart-blue: #4f46e5;
+
+  /* Code samples (GitHub light). */
+  --color-syn-text: #24292f;
+  --color-syn-kw: #cf222e;
+  --color-syn-str: #0a3069;
+  --color-syn-fn: #8250df;
+  --color-syn-const: #0550ae;
+  --color-syn-var: #953800;
+  --color-syn-comment: #6e7781;
+
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+
+  --animate-pulse-dot: pulse-dot 2s ease-in-out infinite;
+  --animate-fade-up: fade-up 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
+  --animate-caret: caret 1s steps(1) infinite;
+  --animate-shimmer: shimmer 2.4s linear infinite;
+}
+
+@keyframes pulse-dot {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 currentColor;
+  }
+  50% {
+    box-shadow: 0 0 0 4px transparent;
+  }
+}
+
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes tour-progress {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+@keyframes caret {
+  50% {
+    opacity: 0;
+  }
+}
+
+@keyframes shimmer {
+  from {
+    background-position: -200% 0;
+  }
+  to {
+    background-position: 200% 0;
+  }
+}
+
+:root {
+  color-scheme: light;
+}
+
+html {
+  background: var(--color-bg);
+}
+
+body {
+  background: var(--color-bg);
+  color: var(--color-fg);
+  font-family: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  font-feature-settings: "liga" 1, "calt" 1;
+  -webkit-font-smoothing: antialiased;
+}
+
+::selection {
+  background: rgb(99 102 241 / 0.25);
+}
+
+:focus-visible {
+  outline: 2px solid rgb(67 56 202 / 0.5);
+  outline-offset: 2px;
+}
+
+@utility no-scrollbar {
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+@utility thin-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-line-strong) transparent;
+}
+
+/* Next.js-style blueprint grid used behind hero sections. */
+@utility bg-grid {
+  background-image:
+    linear-gradient(to right, color-mix(in oklab, var(--color-ink) 5%, transparent) 1px, transparent 1px),
+    linear-gradient(to bottom, color-mix(in oklab, var(--color-ink) 5%, transparent) 1px, transparent 1px);
+  background-size: 64px 64px;
+}
+
+@utility bg-dots {
+  background-image: radial-gradient(color-mix(in oklab, var(--color-ink) 10%, transparent) 1px, transparent 1px);
+  background-size: 16px 16px;
+}
+
+@utility text-balance {
+  text-wrap: balance;
+}
+
+@utility skeleton {
+  background: linear-gradient(90deg, var(--color-bg-200) 25%, var(--color-bg-300) 37%, var(--color-bg-200) 63%);
+  background-size: 400% 100%;
+  animation: var(--animate-shimmer);
+}
+
+/*
+ * Dashboard and marketing chrome: a soft gray frame around a white panel.
+ * The accent is indigo, kept for buttons, links and the active state.
+ */
+@theme {
+  --color-panel: #ffffff;
+  --color-chrome: #f6f6f7;
+  --color-accent: #4338ca;
+  --color-accent-hover: #3730a3;
+  --color-accent-fg: #4338ca;
+  --color-inset: #f7f7f8;
+}
+
+[data-theme="dark"] {
+  color-scheme: dark;
+  --color-bg: #0a0a0b;
+  --color-bg-100: #111113;
+  --color-bg-200: #151517;
+  --color-bg-300: #1d1d20;
+  --color-line: rgb(255 255 255 / 0.08);
+  --color-line-strong: rgb(255 255 255 / 0.14);
+  --color-fg: #ededed;
+  --color-muted: #a1a1aa;
+  --color-subtle: #71717a;
+
+  --color-blue: #6366f1;
+  --color-blue-hover: #818cf8;
+  --color-blue-fg: #a5b4fc;
+  --color-ok: #22c55e;
+  --color-warn: #f59e0b;
+  --color-err: #ef4444;
+  --color-violet: #a78bfa;
+  --color-teal: #2dd4bf;
+
+  --color-ink: #ffffff;
+  --color-shot: #141416;
+  --color-chart-blue: #818cf8;
+
+  --color-syn-text: #e6edf3;
+  --color-syn-kw: #ff7b72;
+  --color-syn-str: #a5d6ff;
+  --color-syn-fn: #d2a8ff;
+  --color-syn-const: #79c0ff;
+  --color-syn-var: #ffa657;
+  --color-syn-comment: #8b949e;
+
+  --color-panel: #0f0f11;
+  --color-chrome: #0a0a0b;
+  --color-accent: #6366f1;
+  --color-accent-hover: #818cf8;
+  --color-accent-fg: #a5b4fc;
+  --color-inset: #0d0d0f;
+}
+
+/* Unlayered, so it wins over the utility classes on the shared Button. */
+.btn-primary {
+  background: var(--color-accent);
+  color: #fff;
+  box-shadow: 0 1px 2px rgb(67 56 202 / 0.25);
+}
+.btn-primary:hover {
+  background: var(--color-accent-hover);
+}
+
+/* ------------------------------------------------------------------ */
+/* Motion                                                              */
+/* ------------------------------------------------------------------ */
+
+@property --angle {
+  syntax: "<angle>";
+  inherits: false;
+  initial-value: 0deg;
+}
+
+:root {
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+}
+
+@keyframes word-in {
+  from {
+    opacity: 0;
+    filter: blur(10px);
+    transform: translateY(18px);
+  }
+  to {
+    opacity: 1;
+    filter: blur(0);
+    transform: none;
+  }
+}
+@keyframes stroke-draw {
+  from {
+    stroke-dashoffset: 1400;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+@keyframes grow-x {
+  from {
+    transform: scaleX(0);
+  }
+}
+@keyframes grow-y {
+  from {
+    transform: scaleY(0);
+  }
+}
+@keyframes breathe {
+  0%,
+  100% {
+    opacity: 0.7;
+    scale: 1;
+  }
+  50% {
+    opacity: 1;
+    scale: 1.08;
+  }
+}
+@keyframes drift {
+  to {
+    transform: translateY(-50%);
+  }
+}
+@keyframes float-y {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+@keyframes marquee {
+  to {
+    transform: translateX(-50%);
+  }
+}
+@keyframes sweep {
+  from {
+    transform: translateX(-150%) skewX(-20deg);
+  }
+  to {
+    transform: translateX(350%) skewX(-20deg);
+  }
+}
+@keyframes scan {
+  from {
+    transform: translateY(-120%);
+  }
+  to {
+    transform: translateY(520%);
+  }
+}
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@keyframes spin-border {
+  to {
+    --angle: 360deg;
+  }
+}
+@keyframes dash-flow {
+  to {
+    stroke-dashoffset: -24;
+  }
+}
+@keyframes bar-pulse {
+  0%,
+  100% {
+    transform: scaleX(1);
+  }
+  50% {
+    transform: scaleX(0.55);
+  }
+}
+@keyframes blink {
+  50% {
+    opacity: 0.2;
+  }
+}
+@keyframes shine-text {
+  from {
+    background-position: 100% 0;
+  }
+  to {
+    background-position: -150% 0;
+  }
+}
+@keyframes slide-down {
+  from {
+    opacity: 0;
+    transform: translateY(-16px);
+  }
+}
+@keyframes slide-in {
+  from {
+    transform: translateX(-100%);
+  }
+}
+
+/* Scroll reveal: MotionRoot flips data-reveal to "in" when the element enters the viewport. */
+[data-reveal] {
+  opacity: 0;
+  transform: translateY(28px);
+  filter: blur(8px);
+  transition:
+    opacity 0.9s var(--ease-out-expo),
+    transform 0.9s var(--ease-out-expo),
+    filter 0.9s var(--ease-out-expo);
+  transition-delay: var(--d, 0ms);
+}
+[data-reveal][data-motion="tilt"] {
+  transform: perspective(1600px) rotateX(22deg) translateY(60px) scale(0.92);
+  transform-origin: 50% 0%;
+  transition-duration: 1.4s;
+}
+[data-reveal][data-motion="scale"] {
+  transform: scale(0.94);
+}
+[data-reveal="in"],
+[data-reveal="in"][data-motion="scale"] {
+  opacity: 1;
+  transform: none;
+  filter: none;
+}
+[data-reveal="in"][data-motion="tilt"] {
+  transform: perspective(1600px) rotateX(0deg) translateY(0) scale(1);
+}
+
+.word-in {
+  display: inline-block;
+  animation: word-in 0.9s var(--ease-out-expo) both;
+  animation-delay: var(--d, 0ms);
+}
+/* Same entrance as .word-in, but keeps the element's own display (flex, block...). */
+.rise-in {
+  animation: word-in 0.9s var(--ease-out-expo) both;
+  animation-delay: var(--d, 0ms);
+}
+.stroke-draw {
+  stroke-dasharray: 1400;
+  animation: stroke-draw 2.8s var(--ease-in-out) both;
+  animation-delay: var(--d, 0ms);
+}
+.grow-x {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: grow-x 1.6s var(--ease-out-expo) both;
+  animation-delay: var(--d, 0ms);
+}
+.grow-y {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: grow-y 1.6s var(--ease-out-expo) both;
+  animation-delay: var(--d, 0ms);
+}
+.svg-float {
+  transform-box: fill-box;
+  animation: float-y 6s ease-in-out infinite;
+  animation-delay: var(--d, 0ms);
+}
+.svg-bar {
+  transform-box: fill-box;
+  transform-origin: left center;
+  animation: bar-pulse 3.2s ease-in-out infinite;
+  animation-delay: var(--d, 0ms);
+}
+.svg-blink {
+  animation: blink 1.6s ease-in-out infinite;
+  animation-delay: var(--d, 0ms);
+}
+.dash-flow {
+  stroke-dasharray: 4 4;
+  animation: dash-flow 1s linear infinite;
+}
+
+/* Charts draw in left-to-right; inside an unrevealed section they wait until it scrolls into view. */
+.chart-clip {
+  transform-box: fill-box;
+  transform-origin: left center;
+  animation: grow-x 1.8s var(--ease-out-expo) both;
+  animation-delay: 0.15s;
+}
+[data-reveal]:not([data-reveal="in"]) .chart-clip,
+[data-reveal]:not([data-reveal="in"]) .play-on-reveal {
+  animation-play-state: paused;
+}
+
+/* Cursor-following spotlight on cards marked data-spot. */
+[data-spot] {
+  position: relative;
+  isolation: isolate;
+}
+[data-spot]::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  opacity: 0;
+  background: radial-gradient(420px circle at var(--mx, 50%) var(--my, 50%), rgb(67 56 202 / 0.06), transparent 45%);
+  transition: opacity 0.3s;
+  pointer-events: none;
+}
+[data-spot]:hover::before {
+  opacity: 1;
+}
+
+/* Animated gradient border (announcement pill). */
+.border-spin {
+  background:
+    linear-gradient(var(--color-bg), var(--color-bg)) padding-box,
+    conic-gradient(from var(--angle), var(--color-line) 0%, #6366f1 12%, var(--color-line) 28%, var(--color-line) 100%) border-box;
+  border: 1px solid transparent;
+  animation: spin-border 4s linear infinite;
+}
+
+.marquee-mask {
+  mask-image: linear-gradient(90deg, transparent, black 10%, black 90%, transparent);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    transition-delay: 0ms !important;
+  }
+  [data-reveal] {
+    opacity: 1;
+    transform: none;
+    filter: none;
+  }
+}
