@@ -1,5 +1,5 @@
 # VPSPilot website (landing page and docs).
-FROM node:22-bookworm-slim AS build
+FROM node:25-bookworm-slim AS build
 WORKDIR /app
 COPY package.json package-lock.json ./
 RUN npm ci --no-audit --no-fund
@@ -7,7 +7,7 @@ COPY . .
 ENV NEXT_OUTPUT=standalone NEXT_TELEMETRY_DISABLED=1
 RUN npm run build
 
-FROM node:22-bookworm-slim
+FROM node:25-bookworm-slim
 WORKDIR /app
 ENV NODE_ENV=production NEXT_TELEMETRY_DISABLED=1 HOSTNAME=0.0.0.0 PORT=3000
 # npm, Yarn and Corepack come with the base image but the server is plain
