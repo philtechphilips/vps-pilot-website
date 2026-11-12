@@ -3,6 +3,7 @@ import type { CSSProperties, ReactNode } from "react";
 import { BrandChip, type Brand } from "@/components/brand-chip";
 import { CommandPill } from "@/components/copy-button";
 import { Icon, type IconName } from "@/components/icons";
+import { Consolidation } from "@/components/marketing/consolidation";
 import { CountUp } from "@/components/marketing/count-up";
 import { DeployTabs } from "@/components/marketing/deploy-tabs";
 import { Display, Label, Mono } from "@/components/marketing/display";
@@ -11,7 +12,6 @@ import { FlowDiagram } from "@/components/marketing/flow-diagram";
 import { Glyph } from "@/components/marketing/glyphs";
 import { HeroField } from "@/components/marketing/hero-field";
 import { TerminalMock } from "@/components/marketing/mocks";
-import { ProblemSolution } from "@/components/marketing/problem-solution";
 import { PROJECT_URL } from "@/lib/site";
 import { cn } from "@/lib/utils";
 
@@ -31,7 +31,7 @@ export default function HomePage() {
   return (
     <>
       <Hero />
-      <ProblemSolution />
+      <Consolidation />
       <Deploy />
       <Facts />
       <Monitor />
